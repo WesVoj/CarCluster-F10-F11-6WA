@@ -1,0 +1,24 @@
+.pio/
+.vscode/
+.arduinoIDE/
+build/
+
+*.bin
+*.elf
+*.hex
+*.map
+*.log
+Thumbs.db
+.DS_Store
+
+# Local captures, research notes, and downloaded third-party repositories.
+# These are intentionally excluded from the public firmware repository.
+/serial_output*.txt
+/serial_log.py
+/CarCluster-F10-Enhanced-main/
+/OTHER F10_GITHUB_REPOS/
+/Misc/autobulbs CCID page.txt
+/CarCluster/HOW_TO_F11_CLOCK.md
+/CarCluster/can-codes.md
+/CarCluster/deep-research-report.md
+/CarCluster/beamng_protocols/
