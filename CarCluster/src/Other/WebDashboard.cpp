@@ -17,6 +17,8 @@ void WebDashboard::getState(DashboardState *data) {
   data->rpm = gameState.rpm;
   data->maximumRPM = gameState.configuration.maximumRPMValue;
   data->fuel = gameState.fuelQuantity;
+  data->fuel_consumption_l_per_100km = gameState.fuelConsumptionLPer100Km;
+  data->fuel_consumption_active = gameState.hasFuelConsumptionData;
   data->high_beam = gameState.highBeam;
   data->fog_rear = gameState.rearFogLight;
   data->fog_front = gameState.frontFogLight;
@@ -42,6 +44,8 @@ void WebDashboard::setState(DashboardState *data) {
   gameState.speed = data->speed;
   gameState.rpm = data->rpm;
   gameState.fuelQuantity = data->fuel;
+  gameState.fuelConsumptionLPer100Km = data->fuel_consumption_l_per_100km;
+  gameState.hasFuelConsumptionData = data->fuel_consumption_active;
   gameState.highBeam = data->high_beam;
   gameState.rearFogLight = data->fog_rear;
   gameState.frontFogLight = data->fog_front;

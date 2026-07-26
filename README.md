@@ -75,10 +75,15 @@ The `/test/vu` page analyses a stereo recording input locally in the browser:
 - left channel drives the speedometer;
 - right channel drives the tachometer;
 - Beat mode emphasizes approximately 35-180 Hz;
-- sensitivity, attack, release, channel linking, and channel swapping are adjustable;
+- transient peak detection catches very short bass hits;
+- sensitivity, attack, release, needle peak hold, channel linking, and channel swapping are adjustable;
+- peak hold keeps a short target high long enough for the cluster's physical needle motors to react; the known CAN frames do not provide a motor-speed setting;
 - a `0 ms` release setting provides an immediate software drop to the current audio level;
 - audio-driven cluster updates continue while this tab is in the background or Chrome is minimized, as long as the VU tab and browser remain open;
-- Stop restores the speed, RPM, and ignition state from before the test.
+- full-range stereo master volume drives the experimental consumption scale linearly: 0% = 0, 50% = 10, and 100% = 20 l/100 km;
+- Stop restores the speed, RPM, ignition, and consumption-data state from before the test.
+
+The RPM target frame is already sent every 10 ms and the speed target frame every 20 ms. Short-peak compensation therefore happens in the audio detector and target hold rather than by claiming to reprogram the cluster's internal stepper-motor speed. The consumption indicator uses the existing experimental `0x2BB`/`0x2C4` economy calculation and may retain some filtering inside the cluster.
 
 No Spotify account data or song metadata is read, and audio is not uploaded to the ESP32 or anywhere else.
 
