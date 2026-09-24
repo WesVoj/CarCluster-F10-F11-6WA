@@ -38,11 +38,11 @@ This exact unit is the compatibility baseline. Other F10/F11 diesel 6WA clusters
 
 ### Clock/date work and Reset Clock warning suppression
 
-The ESP32 keeps local time using NTP when Wi-Fi is available, with the firmware build time as a fallback. Several BMW time broadcasts and UDS RTC paths remain available for controlled testing.
+**Clock setting does not work on the verified cluster.** The ESP32 can obtain local time from NTP, with the firmware build time as a fallback, and the repository still contains experimental CAN/UDS clock research code. None of the tested CAN broadcasts or UDS write attempts successfully set the clock on this Johnson Controls 6WA unit. Runtime date/time broadcasts were therefore removed from the normal update loop; the remaining controls and functions are research code only.
 
 The yellow warning seen on this cluster was identified as check-control **CC-ID 167: Reset Clock**. The firmware repeatedly transmits the matching clear state on `0x5C0`, which suppresses the warning on the verified cluster.
 
-This distinction matters: the workaround clears the warning; it does **not** prove that the cluster's internal RTC has been permanently initialized. Experimental `0x39E`, `0x3F1`, UDS ReadDID/WriteDID, session, SecurityAccess seed, and RTC probes remain exposed for further research.
+This is only a workaround: it repeatedly clears the notification, but it does **not** set or reset the cluster clock. The displayed time can remain unset or incorrect. The current evidence suggests that this cluster expects its working clock source from the head unit over MOST rather than from the tested K-CAN frames. Experimental `0x39E`, `0x3F1`, UDS ReadDID/WriteDID, session, SecurityAccess seed, and RTC probes remain in the project for further research and must not be interpreted as a working time-setting feature.
 
 ### BMW diagnostics and experimental controls
 
@@ -66,7 +66,7 @@ Normal BeamNG OutGauge telemetry remains supported. The parser also accepts the 
 - fuel volume, fuel flow, and calculated consumption;
 - cruise-control state and set speed.
 
-The extended sender is optional; standard OutGauge remains the fallback.
+The extended sender is optional; standard OutGauge remains the fallback. The ready-to-install mod and its complete instructions are under [`beamng_protocols/`](beamng_protocols/README.md).
 
 ### Spotify / Voicemeeter VU needles
 
@@ -75,8 +75,15 @@ The `/test/vu` page analyses a stereo recording input locally in the browser:
 - left channel drives the speedometer;
 - right channel drives the tachometer;
 - Beat mode emphasizes approximately 35-180 Hz;
-- sensitivity, attack, release, channel linking, and channel swapping are adjustable;
-- Stop restores the speed, RPM, and ignition state from before the test.
+- transient peak detection catches very short bass hits;
+- sensitivity, attack, release, needle peak hold, channel linking, and channel swapping are adjustable;
+- peak hold keeps a short target high long enough for the cluster's physical needle motors to react; the known CAN frames do not provide a motor-speed setting;
+- a `0 ms` release setting provides an immediate software drop to the current audio level;
+- audio-driven cluster updates continue while this tab is in the background or Chrome is minimized, as long as the VU tab and browser remain open;
+- full-range stereo master volume drives the experimental consumption scale linearly: 0% = 0, 50% = 10, and 100% = 20 l/100 km;
+- Stop restores the speed, RPM, ignition, and consumption-data state from before the test.
+
+The RPM target frame is already sent every 10 ms and the speed target frame every 20 ms. Short-peak compensation therefore happens in the audio detector and target hold rather than by claiming to reprogram the cluster's internal stepper-motor speed. The consumption indicator uses the existing experimental `0x2BB`/`0x2C4` economy calculation and may retain some filtering inside the cluster.
 
 No Spotify account data or song metadata is read, and audio is not uploaded to the ESP32 or anywhere else.
 
@@ -168,7 +175,9 @@ Enable Data Out and set the destination to the ESP32 IP address and UDP port `11
 
 ### BeamNG.drive
 
-Enable OutGauge under the game's protocol settings and set the destination to the ESP32 IP address and UDP port `1102`.
+For basic speed/RPM telemetry, enable OutGauge under the game's protocol settings and set the destination to the ESP32 IP address and UDP port `1102`.
+
+For the full `CCB1` telemetry used by this fork, download [`carcluster_bmw_protocol.zip`](beamng_protocols/carcluster_bmw_protocol.zip), copy the ZIP unchanged into the BeamNG user folder's `mods` directory, reload the vehicle, and enable the custom/other protocols option. See the [BeamNG protocol installation guide](beamng_protocols/README.md) for the exact path, purpose, configuration, fallback behavior, and troubleshooting notes.
 
 ### SimHub
 
@@ -176,7 +185,7 @@ SimHub is supported over USB serial. Enable its Custom Serial Devices plugin and
 
 ## Project history and attribution
 
-This is not a clean-room implementation. It is a derivative work built on CarCluster and intentionally retains its Git history and original source headers.
+This is not a clean-room implementation. It is a derivative work built on CarCluster and retains the original source headers and attribution. The public repository starts from a clean release snapshot so that removed, license-incompatible generated web-server files are not redistributed in its commit history.
 
 Primary upstream credit belongs to:
 

@@ -33,6 +33,8 @@ struct DashboardState {
   int maximumRPM;
   char gear[3];
   int fuel;
+  float fuel_consumption_l_per_100km;
+  bool fuel_consumption_active;
   int backlight;
   int coolant_temp;
   int maximumCoolantTemp;

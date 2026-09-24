@@ -97,12 +97,14 @@ void sendStateJson() {
     response,
     sizeof(response),
     "{\"speed\":%d,\"maximumSpeed\":%d,\"rpm\":%d,\"maximumRPM\":%d,"
-    "\"gear\":\"%s\",\"fuel\":%d,\"backlight\":%d,\"coolant_temp\":%d,"
+    "\"gear\":\"%s\",\"fuel\":%d,\"fuel_consumption_l_per_100km\":%.2f,"
+    "\"fuel_consumption_active\":%s,\"backlight\":%d,\"coolant_temp\":%d,"
     "\"maximumCoolantTemp\":%d,\"minimumCoolantTemp\":%d,\"outdoor_temp\":%d,"
     "\"high_beam\":%s,\"main_lights\":%s,\"left_indicator\":%s,\"right_indicator\":%s,"
     "\"fog_front\":%s,\"fog_rear\":%s,\"door_open\":%s,\"dsc\":%s,\"abs\":%s,"
     "\"handbrake\":%s,\"ignition\":%s,\"indicators_blink\":%s,\"drive_mode\":\"%s\"}",
     state.speed, state.maximumSpeed, state.rpm, state.maximumRPM, state.gear, state.fuel,
+    (double)state.fuel_consumption_l_per_100km, state.fuel_consumption_active ? "true" : "false",
     state.backlight, state.coolant_temp, state.maximumCoolantTemp, state.minimumCoolantTemp,
     state.outdoor_temp, state.high_beam ? "true" : "false", state.main_lights ? "true" : "false",
     state.left_indicator ? "true" : "false", state.right_indicator ? "true" : "false",
@@ -141,6 +143,8 @@ void updateStateFromRequest() {
   assignJsonNumber(document, "speed", state.speed);
   assignJsonNumber(document, "rpm", state.rpm);
   assignJsonNumber(document, "fuel", state.fuel);
+  assignJsonNumber(document, "fuel_consumption_l_per_100km", state.fuel_consumption_l_per_100km);
+  assignJsonNumber(document, "fuel_consumption_active", state.fuel_consumption_active);
   assignJsonNumber(document, "backlight", state.backlight);
   assignJsonNumber(document, "coolant_temp", state.coolant_temp);
   assignJsonNumber(document, "outdoor_temp", state.outdoor_temp);
@@ -164,6 +168,7 @@ void updateStateFromRequest() {
   state.speed = constrain(state.speed, 0, state.maximumSpeed);
   state.rpm = constrain(state.rpm, 0, state.maximumRPM);
   state.fuel = constrain(state.fuel, 0, 100);
+  state.fuel_consumption_l_per_100km = constrain(state.fuel_consumption_l_per_100km, 0.0f, 60.0f);
   state.backlight = constrain(state.backlight, 0, 100);
   state.coolant_temp = constrain(state.coolant_temp, state.minimumCoolantTemp, state.maximumCoolantTemp);
   state.outdoor_temp = constrain(state.outdoor_temp, -50, 85);
